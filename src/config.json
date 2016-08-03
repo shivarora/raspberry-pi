@@ -1,0 +1,14 @@
+{
+  "appDynamics": {
+    "active": false
+  },
+  "db": {
+    "mongodb": {
+      "string": ""
+    }
+  },
+  "server": {
+    "port": "",
+    "production" : false
+  }
+}
