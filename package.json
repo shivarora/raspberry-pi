@@ -31,6 +31,7 @@
     "node-watch": "^0.4.0",
     "onoff": "^1.1.1",
     "pg": "4.4.6",
+    "request": "^2.74.0",
     "restify": "4.0.4"
   },
   "devDependencies": {

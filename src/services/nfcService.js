@@ -1,14 +1,17 @@
 "use strict";
 
 // Imports
+import child_process from "child_process";
 import _ from "lodash";
 import watch from "node-watch";
 import Cryptr from "cryptr";
 import request from "request";
+import fs from "fs";
 const Gpio = require('onoff').Gpio;
 
 // Variables
-const nfcFilePath = __dirname + "/../../nfc.txt";
+let nfcFilePath = __dirname + "/../../nfc.txt";
+nfcFilePath = "/home/pi/Desktop/nfcReader/";
 const encrptKey = "Cr0mwellTools";
 const apiUrl = "https://reception.cromwell-tools.co.uk/";
 
@@ -28,7 +31,7 @@ export class NfcService {
 
         return new Promise((resolve, reject) => {
 
-            child_process.exec("stdbuf -i0 -o0 -e0 explorenfc-basic -k > " + nfcFilePath, (err, data) => {
+            child_process.exec("stdbuf -i0 -o0 -e0 explorenfc-basic -k > " + nfcFilePath + "nfc.txt", (err, data) => {
 
                 if(err) {
                     reject(err);
@@ -42,16 +45,16 @@ export class NfcService {
 
         return new Promise((resolve, reject) => {
 
+		this._logger.info("System Ready!");
+
             let watcher = watch(nfcFilePath);
             watcher.on("change", (file) => {
 
                 this._getStaffId()
                     .then(staffId => {
+                        this._logger.info("Making api request ....");
 
-                        this._logger.info("Staff Id found " + StaffId);
-                        this._logger.info(". Making api request ....");
-
-                        return _apiRequest(staffId);
+                        return this._apiRequest(staffId);
 
                     })
                     .then(() => {
@@ -93,10 +96,15 @@ export class NfcService {
     _apiRequest(staffId) {
 
         return new Promise((resolve, reject) => {
+	   
+	   this._logger.info(apiUrl + "nfcActivity/" + staffId);	
 
-            request(apiUrl + " nfcActivity/ " + staffId , (error, response, body) => {
+            request(apiUrl + "nfcActivity/" + staffId , (error, response, body) => {
+		
+		
+                 this._logger.info("Api response " + body);
 
-                if (!error && response.statusCode == 200) {
+		 if (!error && response.statusCode == 200) {
 
                     try {
                         body = JSON.parse(body);
@@ -140,7 +148,11 @@ export class NfcService {
 
                     }
 
-                }
+                } else {
+			this._logger.error(error.message);
+			this._logger.error("Api Error!");
+			reject("Api Error! Possibly no response from the api")
+		}
 
             });
 
@@ -151,18 +163,19 @@ export class NfcService {
 
         return new Promise((resolve, reject) => {
 
-            let cryptr = new Cryptr(encryptKey);
-            let file = fs.readFileSync(nfcFilePath);
+            let cryptr = new Cryptr(encrptKey);
+            let file = fs.readFileSync(nfcFilePath+ "nfc.txt");
             let token =  file.toString();
             let tokenArray = token.split(/\r?\n/);
 
             tokenArray.reverse();
+	    console.log(JSON.stringify(tokenArray));
 
             if (tokenArray[8] && tokenArray[8].indexOf("Title:") !== -1) {
 
                 let userIdArray =  tokenArray[8].split(":");
                 let staffId  = cryptr.decrypt(userIdArray[1].trim());
-
+		this._logger.info("Staff Id Found " + staffId);
                 resolve(staffId);
 
             } else {
