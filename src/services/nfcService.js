@@ -169,7 +169,7 @@ export class NfcService {
             let tokenArray = token.split(/\r?\n/);
 
             tokenArray.reverse();
-	    console.log(JSON.stringify(tokenArray[10]));
+	    console.log(JSON.stringify(tokenArray));
 
             if (tokenArray[8] && tokenArray[8].indexOf("Title:") !== -1) {
 

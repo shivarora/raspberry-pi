@@ -1,4 +1,4 @@
-# Cromwell Message Sender
+# Message Sender
 
 Polls the database periodically to send messages to a message queue
 
