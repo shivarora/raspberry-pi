@@ -1,6 +1,5 @@
-# Message Sender
-
-Polls the database periodically to send messages to a message queue
+# NFC based login system
+ Staff login system using NFC reader and NFC Tags
 
 ## Config
 
